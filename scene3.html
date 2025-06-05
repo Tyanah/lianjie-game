@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <script src="state.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>廉洁文化互动漫画 - 第三幕</title>
+  <link href="https://s2.ssl.qhres2.com/static/56662140ef7d5d03.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Ma Shan Zheng', cursive; background: #F8FFF0; margin: 0; }
+    .hand-drawn-border { max-width: 900px; margin: 1rem auto; background: #fff; border-radius: 30px; box-shadow: 0 8px 32px #00bfff33; padding: 1rem; }
+    .sketch-title { font-size: 2.5rem; text-align: center; color: #1e90ff; text-shadow: 2px 2px 0 #00bfff; }
+    .panel-title { font-size: 1.5rem; color: #1e90ff; margin-bottom: 1rem; }
+    .panel-content { display: flex; flex-direction: column; gap: 1rem; }
+    .panel-text { background: #fff; border-radius: 20px; padding: 1rem; box-shadow: 0 2px 8px #00bfff22; }
+    .game-container { width: 100%; height: 420px; background: #f8fbff; border-radius: 24px; position: relative; overflow: hidden; }
+    #gameCanvas { width: 100%; height: 100%; display: none; }
+    .visible { display: block !important; }
+    .btn-hand-drawn { display: inline-block; padding: 0.5rem 1.5rem; background: linear-gradient(90deg,#00bfff,#1e90ff); color: white; border: none; border-radius: 20px; font-size: 1.2rem; cursor: pointer; box-shadow: 3px 3px 0 #00bfff44; transition: all 0.3s; margin-top: 1rem; }
+    .btn-hand-drawn:hover { transform: scale(1.05); box-shadow: 5px 5px 0 #00bfff66; }
+    .btn-hand-drawn:active { transform: scale(0.98); }
+    .game-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f0f8ff; color: #1e90ff; }
+    @media (max-width: 600px) {
+      .hand-drawn-border { max-width: 99vw; }
+      .game-container { height: 320px; }
+    }
+  </style>
+</head>
+<body>
+<div class="hand-drawn-border fade-in">
+  <h1 class="sketch-title">廉洁文化互动漫画</h1>
+  <div class="comic-panel" id="panel3">
+    <h2 class="panel-title">第三幕：坚守与荣誉</h2>
+    <div class="panel-content">
+      <div class="panel-text">
+        <p>风波过后，张明的坚持逐渐被大家认可。</p>
+        <p>他获得了“廉洁楷模”荣誉，也收获了同事和家人的理解。</p>
+        <p>但人生的考验远未结束……</p>
+      </div>
+      <div class="game-container">
+        <div class="game-placeholder">
+          <p style="font-size:1.2rem;margin-bottom:1rem;">点击下方按钮开启第三幕</p>
+          <button class="btn-hand-drawn" onclick="initGame('ThirdScene')">开始第三幕</button>
+        </div>
+        <div id="gameCanvas"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script type="module">
+import { showStatsBar, showAchievementToast } from './modules/ui.js';
+import { unlockAchievement } from './modules/achievements.js';
+import { unlockCollection } from './modules/collection.js';
+window.loadState && window.loadState();
+let currentGame = null;
+function initGame(sceneKey) {
+  if (currentGame) currentGame.destroy(true);
+  document.querySelector('.game-placeholder').style.display = 'none';
+  const gameCanvas = document.getElementById('gameCanvas');
+  gameCanvas.classList.add('visible');
+  const config = {
+    type: Phaser.AUTO,
+    parent: 'gameCanvas',
+    width: gameCanvas.offsetWidth,
+    height: gameCanvas.offsetHeight,
+    backgroundColor: '#F8FFF0',
+    physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
+    scene: { preload: preload, create: createThirdScene }
+  };
+  currentGame = new Phaser.Game(config);
+}
+window.initGame = initGame;
+
+function preload() {
+  this.load.image('player', 'assets/sprites/player.png');
+  this.load.image('family', 'assets/sprites/family.png');
+  this.load.image('office', 'assets/sprites/office.png');
+  this.load.image('awardMedal', 'assets/sprites/awardMedal.png');
+  this.load.image('npc3', 'assets/sprites/npc3.png');
+  this.load.audio('award', 'assets/audio/award.mp3');
+    this.load.audio('bgm', 'assets/audio/bgm.mp3');
+  this.load.image('leader', 'assets/sprites/leader.png');
+this.load.image('family_one', 'assets/sprites/family_one.png');
+}
+
+function createThirdScene() {
+  const scene = this;
+  window.currentPhaserScene = scene;
+  const containerWidth = this.cameras.main.width;
+  const containerHeight = this.cameras.main.height;
+
+  // 背景
+  // ...existing code...
+// 背景底色
+this.add.rectangle(containerWidth/2, containerHeight/2, containerWidth-20, containerHeight-20, 0xF5DEB3);
+
+// 让图片等比缩放填满两侧
+const officeImg = this.textures.get('office').getSourceImage();
+const scaleX = (containerWidth-20) / officeImg.width;
+const scaleY = (containerHeight-20) / officeImg.height;
+const scale = Math.max(scaleX, scaleY); // 保证两侧填满
+this.add.image(containerWidth/2, containerHeight/2, 'office').setScale(scale);
+// ...existing code...
+if (!window._bgm) {
+    window._bgm = this.sound.add('bgm', { loop: true, volume: 0.005 });
+    window._bgm.play();
+  }
+  // 属性条
+  let statsText = showStatsBar(this, gameState.stats);
+  function updateStats() {
+    statsText.setText(`廉洁值:${gameState.stats.integrity}\n声望:${gameState.stats.reputation}\n智慧:${gameState.stats.wisdom}\n勇气:${gameState.stats.courage}`);
+  }
+
+  // 主角
+  const player = this.physics.add.sprite(containerWidth*0.2, containerHeight*0.8, 'player')
+    .setDisplaySize(32, 32).setTint(0x8B4513).setDepth(2);
+  player.body.setCollideWorldBounds(true);
+
+  // 家人
+  const family = this.physics.add.sprite(containerWidth*0.7, containerHeight*0.5, 'family').setScale(0.22).setDepth(2);
+  family.body.setAllowGravity(false);
+  family.setImmovable(true);
+
+  // 新增：同事NPC
+  const npc3 = this.physics.add.sprite(containerWidth*0.5, containerHeight*0.4, 'npc3').setScale(0.18).setDepth(2);
+
+  // 方向键控制
+  this.cursors = this.input.keyboard.createCursorKeys();
+  const btnSize = 40, btnAlpha = 0.5;
+  const upBtn = this.add.rectangle(60, containerHeight-100, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  const downBtn = this.add.rectangle(60, containerHeight-20, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  const leftBtn = this.add.rectangle(20, containerHeight-60, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  const rightBtn = this.add.rectangle(100, containerHeight-60, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  this.add.text(55, containerHeight-110, '↑', {fontSize:'20px',color:'#fff'});
+  this.add.text(55, containerHeight-15, '↓', {fontSize:'20px',color:'#fff'});
+  this.add.text(10, containerHeight-65, '←', {fontSize:'20px',color:'#fff'});
+  this.add.text(95, containerHeight-65, '→', {fontSize:'20px',color:'#fff'});
+
+  let moveDir = {up:false, down:false, left:false, right:false};
+  upBtn.on('pointerdown', ()=>{moveDir.up=true;});
+  upBtn.on('pointerup', ()=>{moveDir.up=false;});
+  downBtn.on('pointerdown', ()=>{moveDir.down=true;});
+  downBtn.on('pointerup', ()=>{moveDir.down=false;});
+  leftBtn.on('pointerdown', ()=>{moveDir.left=true;});
+  leftBtn.on('pointerup', ()=>{moveDir.left=false;});
+  rightBtn.on('pointerdown', ()=>{moveDir.right=true;});
+  rightBtn.on('pointerup', ()=>{moveDir.right=false;});
+
+  this.events.on('update', () => {
+    player.setVelocity(0);
+    if (this.cursors.left.isDown || moveDir.left) player.setVelocityX(-150);
+    else if (this.cursors.right.isDown || moveDir.right) player.setVelocityX(150);
+    if (this.cursors.up.isDown || moveDir.up) player.setVelocityY(-150);
+    else if (this.cursors.down.isDown || moveDir.down) player.setVelocityY(150);
+  });
+
+  // 对话弹窗
+  let dialogMask = this.add.rectangle(containerWidth/2, containerHeight/2, containerWidth, containerHeight, 0x000000, 0.45)
+    .setDepth(10).setVisible(false);
+
+  let dialogBoxGfx = this.add.graphics({ x: 0, y: 0 }).setDepth(11).setVisible(false);
+  const boxW = 580, boxH = 260, boxR = 44;
+
+  function showDialogBox() {
+    dialogBoxGfx.clear();
+    dialogBoxGfx.fillStyle(0xffffff, 0.12);
+    dialogBoxGfx.fillRoundedRect(containerWidth/2-boxW/2-8, containerHeight/2-boxH/2-8, boxW+16, boxH+16, boxR+8);
+    dialogBoxGfx.fillStyle(0x1e90ff, 0.90);
+    dialogBoxGfx.fillRoundedRect(containerWidth/2-boxW/2, containerHeight/2-boxH/2, boxW, boxH, boxR);
+    dialogBoxGfx.lineStyle(8, 0x00ffff, 0.92);
+    dialogBoxGfx.strokeRoundedRect(containerWidth/2-boxW/2, containerHeight/2-boxH/2, boxW, boxH, boxR);
+    dialogBoxGfx.setAlpha(0);
+    dialogBoxGfx.setVisible(true);
+    this.tweens.add({ targets: dialogBoxGfx, alpha: 1, duration: 300 });
+  }
+  function hideDialogBox() { dialogBoxGfx.setVisible(false); }
+
+  let dialogText = this.add.text(containerWidth/2, containerHeight/2, '', {
+    fontSize: '26px',
+    fill: '#fff',
+    fontFamily: 'Ma Shan Zheng',
+    align: 'center',
+    wordWrap: { width: 500 },
+    shadow: { offsetX: 0, offsetY: 2, color: '#00ffff', blur: 8, fill: true }
+  }).setOrigin(0.5, 0.5).setDepth(12).setVisible(false);
+
+  let bigPlayer = this.add.sprite(containerWidth/2-90, containerHeight/2+60, 'player')
+    .setDisplaySize(80, 80).setDepth(13).setVisible(false);
+
+  // 新增：与同事互动
+  npc3.setInteractive();
+  npc3.on('pointerdown', () => {
+    dialogMask.setVisible(true);
+    showDialogBox.call(this);
+    dialogText.setVisible(true);
+    dialogText.setText('同事：张明，你的坚持让我很佩服！');
+    this.time.delayedCall(1200, () => {
+      dialogText.setVisible(false);
+      dialogMask.setVisible(false);
+      hideDialogBox();
+      unlockCollection('egg1');
+      showAchievementToast(this, '收集解锁：神秘彩蛋');
+    });
+  });
+
+  // 剧情触发
+  let familyBtn, workBtn, exclamIcon;
+  let hasPlayed = false;
+
+  this.physics.add.overlap(player, family, () => {
+    if (dialogMask.visible || hasPlayed) return;
+    hasPlayed = true;
+    dialogMask.setVisible(true);
+    showDialogBox.call(this);
+    dialogText.setVisible(true);
+    bigPlayer.setVisible(true);
+    player.setVisible(false);
+    family.setVisible(false);
+
+    // 画面元素
+    const dialogCenterX = containerWidth/2;
+    const dialogCenterY = containerHeight/2;
+    let awardImg = this.add.image(dialogCenterX + 220, dialogCenterY - 110, 'awardMedal')
+      .setScale(0.4).setDepth(16).setAlpha(1).setInteractive();
+
+    // 剧情分步推进
+    let step = 0;
+    const dialogArr = [
+      '家人：你最近很辛苦，大家都很支持你！',
+      '张明：谢谢你们的理解和陪伴。',
+      '你会继续坚守岗位？还是考虑多陪陪家人？',
+      '你要如何选择？'
+    ];
+
+    function tryShowChoice() {
+      dialogMask.setVisible(true);
+      showDialogBox.call(this);
+      dialogText.setVisible(true);
+      dialogText.setText('你要如何选择？');
+      dialogText.setWordWrapWidth(500);
+
+      familyBtn = this.add.text(dialogCenterX-80, dialogCenterY+70, '陪伴家人', {
+        fontSize: '18px', fill: '#fff', backgroundColor: '#00bfff', padding: { x: 16, y: 8 }
+      }).setDepth(18).setInteractive();
+
+      workBtn = this.add.text(dialogCenterX+40, dialogCenterY+70, '坚守岗位', {
+        fontSize: '18px', fill: '#fff', backgroundColor: '#00bfff', padding: { x: 16, y: 8 }
+      }).setDepth(18).setInteractive();
+
+      familyBtn.on('pointerdown', () => {
+  gameState.stats.reputation += 10;
+  unlockAchievement('family', '家庭温情');
+  unlockCollection('person2');
+  showAchievementToast(this, '成就解锁：家庭温情');
+  familyBtn.destroy(); workBtn.destroy();
+  dialogText.setText('你选择陪伴家人，收获了幸福。');
+  updateStats();
+  this.time.delayedCall(1200, () => {
+     showRichEnding.call(this);
+    // 直接跳转到结局
+    //window.location.href = 'ending.html';
+  });
+});
+workBtn.on('pointerdown', () => {
+  gameState.stats.integrity += 10;
+  unlockAchievement('honor', '坚守荣誉');
+  workBtn.destroy(); familyBtn.destroy();
+  dialogText.setText('你选择坚守岗位，继续为民服务。');
+  updateStats();
+  this.time.delayedCall(1200, () => {
+     showRichEnding.call(this);
+    // 直接跳转到结局
+    //window.location.href = 'ending.html';
+  });
+});
+    }
+
+    const nextStep = () => {
+      step++;
+      dialogText.setText('');
+      dialogText.setPosition(dialogCenterX, dialogCenterY).setOrigin(0.5, 0.5);
+
+      if (step >= 1 && step <= 3) {
+        dialogText.setText(dialogArr[step - 1]);
+        setTimeout(nextStep, 2200);
+      } else {
+        dialogText.setText('你要如何选择？');
+        dialogText.setWordWrapWidth(500);
+        this.time.delayedCall(1200, () => {
+          dialogText.setVisible(false);
+          dialogMask.setVisible(false);
+          hideDialogBox();
+          tryShowChoice.call(this);
+        });
+      }
+    };
+
+    nextStep();
+
+    dialogText.setWordWrapWidth(320);
+  });
+
+function showRichEnding() {
+    // 1. 多轮对话内容
+    const dialogSteps = [
+      { speaker: '同事', text: '张明，你的坚持让我很佩服！', sprite: 'npc3', x: 0 },
+      { speaker: '领导', text: '你是我们单位的榜样，继续加油！', sprite: 'leader', x: 90 },
+      { speaker: '家人', text: '我们一直支持你，辛苦啦！', sprite: 'family_one', x: -30 },
+      { speaker: '张明', text: '谢谢大家的理解和支持，我会继续努力！', sprite: 'player', x: -90 }
+    ];
+    let idx = 0;
+
+    // 2. 彩蛋和成就
+    function showEggAndAchievement() {
+      unlockCollection('egg2');
+      showAchievementToast(this, '收集解锁：温情彩蛋');
+      //unlockAchievement('ending', '圆满结局');
+      //showAchievementToast(this, '成就解锁：圆满结局');
+    }
+
+    // 3. 特写动画
+    function showSpecialScene() {
+      // 展示全家福或荣誉证书
+      let specialImg = this.add.image(containerWidth/2, containerHeight/2, 'family')
+        .setDisplaySize(320, 200).setDepth(30).setAlpha(0);
+      this.tweens.add({ targets: specialImg, alpha: 1, duration: 800 });
+      let tip = this.add.text(containerWidth/2, containerHeight/2+120, '全家福时刻', {
+        fontSize: '24px', fill: '#1e90ff', fontWeight: 'bold', fontFamily: 'Ma Shan Zheng'
+      }).setOrigin(0.5).setDepth(31).setAlpha(0);
+      this.tweens.add({ targets: tip, alpha: 1, duration: 800, delay: 400 });
+      this.time.delayedCall(1800, () => {
+        specialImg.destroy();
+        tip.destroy();
+        showPlayerChoice.call(this);
+      });
+    }
+
+    // 4. 玩家结尾选择
+    function showPlayerChoice() {
+      let btn1 = this.add.text(containerWidth/2-80, containerHeight/2+80, '发表感言', {
+        fontSize: '20px', fill: '#fff', backgroundColor: '#1e90ff', padding: { x: 18, y: 10 }, borderRadius: 12
+      }).setOrigin(0.5).setDepth(40).setInteractive();
+
+      btn1.on('pointerdown', () => {
+        btn1.destroy(); 
+        dialogText.setVisible(true);
+        dialogText.setText('张明：廉洁是我的信仰，感谢大家的支持！');
+        this.time.delayedCall(1600, () => {
+          dialogText.setVisible(false);
+          goToEnding();
+        });
+      });
+  
+    }
+
+    // 5. 跳转结局
+    const goToEnding = () => {
+  this.time.delayedCall(800, () => {
+    window.location.href = 'ending.html';
+  });
+};
+
+    // 6. 多轮对话推进
+    function nextDialog() {
+      dialogMask.setVisible(true);
+      showDialogBox.call(this);
+      dialogText.setVisible(true);
+      let step = dialogSteps[idx];
+      dialogText.setText(`${step.speaker}：${step.text}`);
+      // 可选：显示对应人物头像
+      if (step.sprite) {
+        let avatar = this.add.sprite(containerWidth/2+step.x, containerHeight/2+60, step.sprite)
+          .setDisplaySize(80, 80).setDepth(15).setVisible(true);
+        this.time.delayedCall(1400, () => avatar.destroy());
+      }
+      idx++;
+      if (idx < dialogSteps.length) {
+        this.time.delayedCall(1600, nextDialog, [], this);
+      } else {
+        this.time.delayedCall(1400, () => {
+          dialogText.setVisible(false);
+          dialogMask.setVisible(false);
+          hideDialogBox();
+          showEggAndAchievement.call(this);
+          this.time.delayedCall(1200, () => {
+            showSpecialScene.call(this);
+          });
+        });
+      }
+    }
+    nextDialog.call(this);
+  }
+
+ 
+
+  function showExclamAndGotoNext(score) {
+    dialogMask.setVisible(false);
+    hideDialogBox();
+    dialogText.setVisible(false);
+    bigPlayer.setVisible(false);
+    if (familyBtn) familyBtn.destroy();
+    if (workBtn) workBtn.destroy();
+    let exclamIcon = this.add.text(containerWidth/2-10, containerHeight/2-30, '！', {
+      fontSize: '48px', fill: '#00ffff', fontWeight: 'bold', shadow: { color: '#1e90ff', blur: 8, fill: true }
+    }).setDepth(20);
+    // 小游戏分数影响属性和成就
+    if (typeof score === 'number') {
+      if (score >= 2) {
+        gameState.stats.wisdom += 5;
+        unlockAchievement('quizmaster', '答题达人');
+        showAchievementToast(this, '成就解锁：答题达人');
+      }
+    }
+    saveState();
+    this.time.delayedCall(1000, () => {
+      exclamIcon.destroy();
+      window.location.href = 'ending.html';
+    });
+  }
+}
+</script>
+</body>
+</html>

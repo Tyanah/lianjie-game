@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <script src="state.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>廉洁文化互动漫画 - 第二幕</title>
+  <link href="https://s2.ssl.qhres2.com/static/56662140ef7d5d03.css" rel="stylesheet">
+  <style>
+    body { font-family: 'Ma Shan Zheng', cursive; background: #F0F8FF; margin: 0; }
+    .hand-drawn-border { max-width: 900px; margin: 1rem auto; background: #fff; border-radius: 30px; box-shadow: 0 8px 32px #00bfff33; padding: 1rem; }
+    .sketch-title { font-size: 2.5rem; text-align: center; color: #1e90ff; text-shadow: 2px 2px 0 #00bfff; }
+    .panel-title { font-size: 1.5rem; color: #1e90ff; margin-bottom: 1rem; }
+    .panel-content { display: flex; flex-direction: column; gap: 1rem; }
+    .panel-text { background: #fff; border-radius: 20px; padding: 1rem; box-shadow: 0 2px 8px #00bfff22; }
+    .game-container { width: 100%; height: 420px; background: #f8fbff; border-radius: 24px; position: relative; overflow: hidden; }
+    #gameCanvas { width: 100%; height: 100%; display: none; }
+    .visible { display: block !important; }
+    .btn-hand-drawn { display: inline-block; padding: 0.5rem 1.5rem; background: linear-gradient(90deg,#00bfff,#1e90ff); color: white; border: none; border-radius: 20px; font-size: 1.2rem; cursor: pointer; box-shadow: 3px 3px 0 #00bfff44; transition: all 0.3s; margin-top: 1rem; }
+    .btn-hand-drawn:hover { transform: scale(1.05); box-shadow: 5px 5px 0 #00bfff66; }
+    .btn-hand-drawn:active { transform: scale(0.98); }
+    .game-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f0f8ff; color: #1e90ff; }
+    @media (max-width: 600px) {
+      .hand-drawn-border { max-width: 99vw; }
+      .game-container { height: 320px; }
+      .sketch-title { font-size: 1.4rem; }
+      .panel-title { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="hand-drawn-border fade-in">
+  <h1 class="sketch-title">廉洁文化互动漫画</h1>
+  <div class="comic-panel" id="panel2">
+    <h2 class="panel-title">第二幕：风波考验</h2>
+    <div class="panel-content">
+      <div class="panel-text">
+        <p>张明拒绝了诱惑，却被同事误解为“清高”，甚至被匿名举报。</p>
+        <p>领导找他谈话，群众也议论纷纷。此时，张明能否坚持自我？</p>
+        <p>请继续探索，体验更多互动与挑战！</p>
+      </div>
+      <div class="game-container">
+        <div class="game-placeholder">
+          <p style="font-size:1.2rem;margin-bottom:1rem;">点击下方按钮开启第二幕</p>
+          <button class="btn-hand-drawn" onclick="initGame('SecondScene')">开始第二幕</button>
+        </div>
+        <div id="gameCanvas"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script type="module">
+import { showStatsBar, showAchievementToast } from './modules/ui.js';
+import { updateNpcFavor, getNpcComment } from './modules/npc.js';
+import { unlockAchievement } from './modules/achievements.js';
+import { unlockCollection } from './modules/collection.js';
+import { showLinkGame, showMemoryGame } from './modules/miniGames.js';
+window.loadState && window.loadState();
+let currentGame = null;
+function initGame(sceneKey) {
+  if (currentGame) currentGame.destroy(true);
+  document.querySelector('.game-placeholder').style.display = 'none';
+  const gameCanvas = document.getElementById('gameCanvas');
+  gameCanvas.classList.add('visible');
+  const config = {
+    type: Phaser.AUTO,
+    parent: 'gameCanvas',
+    width: gameCanvas.offsetWidth,
+    height: gameCanvas.offsetHeight,
+    backgroundColor: '#F0F8FF',
+    physics: { default: 'arcade', arcade: { gravity: { y: 0 }, debug: false } },
+    scene: { preload: preload, create: createSecondScene }
+  };
+  currentGame = new Phaser.Game(config);
+}
+window.initGame = initGame;
+
+function preload() {
+  this.load.image('player', 'assets/sprites/player.png');
+  this.load.image('leader', 'assets/sprites/leader.png');
+  this.load.image('office', 'assets/sprites/office.png');
+  this.load.image('awardMedal', 'assets/sprites/awardMedal.png');
+  this.load.image('phone', 'assets/sprites/phone.png');
+  this.load.image('npc1', 'assets/sprites/npc1.png');
+  this.load.image('npc2', 'assets/sprites/npc2.png');
+  this.load.audio('click', 'assets/audio/click.mp3');
+  this.load.audio('bgm', 'assets/audio/bgm.mp3');
+}
+
+function createSecondScene() {
+  const scene = this;
+  window.currentPhaserScene = scene;
+  const containerWidth = this.cameras.main.width;
+  const containerHeight = this.cameras.main.height;
+
+  // 背景
+ // ...existing code...
+// 背景底色
+this.add.rectangle(containerWidth/2, containerHeight/2, containerWidth-20, containerHeight-20, 0xF5DEB3);
+
+// 让图片等比缩放填满两侧
+const officeImg = this.textures.get('office').getSourceImage();
+const scaleX = (containerWidth-20) / officeImg.width;
+const scaleY = (containerHeight-20) / officeImg.height;
+const scale = Math.max(scaleX, scaleY); // 保证两侧填满
+this.add.image(containerWidth/2, containerHeight/2, 'office').setScale(scale);
+// ...existing code...
+if (!window._bgm) {
+    window._bgm = this.sound.add('bgm', { loop: true, volume: 0.005 });
+    window._bgm.play();
+  }
+  // 属性条
+  let statsText = showStatsBar(this, gameState.stats);
+  function updateStats() {
+    statsText.setText(`廉洁值:${gameState.stats.integrity}\n声望:${gameState.stats.reputation}\n智慧:${gameState.stats.wisdom}\n勇气:${gameState.stats.courage}`);
+  }
+
+  // 主角
+  const player = this.physics.add.sprite(containerWidth*0.2, containerHeight*0.8, 'player')
+    .setDisplaySize(32, 32).setTint(0x8B4513).setDepth(2);
+  player.body.setCollideWorldBounds(true);
+
+  // 领导
+  const leader = this.physics.add.sprite(containerWidth*0.7, containerHeight*0.5, 'leader').setScale(0.22).setDepth(2);
+  leader.body.setAllowGravity(false);
+  leader.setImmovable(true);
+
+  // 群众NPC
+  const npc1 = this.physics.add.sprite(containerWidth*0.4, containerHeight*0.4, 'npc1').setScale(0.18).setDepth(2);
+  const npc2 = this.physics.add.sprite(containerWidth*0.6, containerHeight*0.7, 'npc2').setScale(0.18).setDepth(2);
+
+  // 方向键控制
+  this.cursors = this.input.keyboard.createCursorKeys();
+  const btnSize = 40, btnAlpha = 0.5;
+  const upBtn = this.add.rectangle(60, containerHeight-100, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  const downBtn = this.add.rectangle(60, containerHeight-20, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  const leftBtn = this.add.rectangle(20, containerHeight-60, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  const rightBtn = this.add.rectangle(100, containerHeight-60, btnSize, btnSize, 0x8B4513, btnAlpha).setInteractive();
+  this.add.text(55, containerHeight-110, '↑', {fontSize:'20px',color:'#fff'});
+  this.add.text(55, containerHeight-15, '↓', {fontSize:'20px',color:'#fff'});
+  this.add.text(10, containerHeight-65, '←', {fontSize:'20px',color:'#fff'});
+  this.add.text(95, containerHeight-65, '→', {fontSize:'20px',color:'#fff'});
+
+  let moveDir = {up:false, down:false, left:false, right:false};
+  upBtn.on('pointerdown', ()=>{moveDir.up=true;});
+  upBtn.on('pointerup', ()=>{moveDir.up=false;});
+  downBtn.on('pointerdown', ()=>{moveDir.down=true;});
+  downBtn.on('pointerup', ()=>{moveDir.down=false;});
+  leftBtn.on('pointerdown', ()=>{moveDir.left=true;});
+  leftBtn.on('pointerup', ()=>{moveDir.left=false;});
+  rightBtn.on('pointerdown', ()=>{moveDir.right=true;});
+  rightBtn.on('pointerup', ()=>{moveDir.right=false;});
+
+  this.events.on('update', () => {
+    player.setVelocity(0);
+    if (this.cursors.left.isDown || moveDir.left) player.setVelocityX(-150);
+    else if (this.cursors.right.isDown || moveDir.right) player.setVelocityX(150);
+    if (this.cursors.up.isDown || moveDir.up) player.setVelocityY(-150);
+    else if (this.cursors.down.isDown || moveDir.down) player.setVelocityY(150);
+  });
+
+  // 对话弹窗
+  let dialogMask = this.add.rectangle(containerWidth/2, containerHeight/2, containerWidth, containerHeight, 0x000000, 0.45)
+    .setDepth(10).setVisible(false);
+
+  let dialogBoxGfx = this.add.graphics({ x: 0, y: 0 }).setDepth(11).setVisible(false);
+  const boxW = 580, boxH = 260, boxR = 44;
+
+  function showDialogBox() {
+    dialogBoxGfx.clear();
+    dialogBoxGfx.fillStyle(0xffffff, 0.12);
+    dialogBoxGfx.fillRoundedRect(containerWidth/2-boxW/2-8, containerHeight/2-boxH/2-8, boxW+16, boxH+16, boxR+8);
+    dialogBoxGfx.fillStyle(0x1e90ff, 0.90);
+    dialogBoxGfx.fillRoundedRect(containerWidth/2-boxW/2, containerHeight/2-boxH/2, boxW, boxH, boxR);
+    dialogBoxGfx.lineStyle(8, 0x00ffff, 0.92);
+    dialogBoxGfx.strokeRoundedRect(containerWidth/2-boxW/2, containerHeight/2-boxH/2, boxW, boxH, boxR);
+    dialogBoxGfx.setAlpha(0);
+    dialogBoxGfx.setVisible(true);
+    this.tweens.add({ targets: dialogBoxGfx, alpha: 1, duration: 300 });
+  }
+  function hideDialogBox() { dialogBoxGfx.setVisible(false); }
+
+  let dialogText = this.add.text(containerWidth/2, containerHeight/2, '', {
+    fontSize: '26px',
+    fill: '#fff',
+    fontFamily: 'Ma Shan Zheng',
+    align: 'center',
+    wordWrap: { width: 500 },
+    shadow: { offsetX: 0, offsetY: 2, color: '#00ffff', blur: 8, fill: true }
+  }).setOrigin(0.5, 0.5).setDepth(12).setVisible(false);
+
+  let bigPlayer = this.add.sprite(containerWidth/2-90, containerHeight/2+60, 'player')
+    .setDisplaySize(80, 80).setDepth(13).setVisible(false);
+
+  // 群众互动
+  npc1.setInteractive();
+  npc2.setInteractive();
+  npc1.on('pointerdown', () => {
+    dialogMask.setVisible(true);
+    showDialogBox.call(this);
+    dialogText.setVisible(true);
+    dialogText.setText('群众甲：听说张明拒绝了礼物，真有骨气！');
+    this.time.delayedCall(1200, () => {
+      dialogText.setVisible(false);
+      dialogMask.setVisible(false);
+      hideDialogBox();
+      unlockCollection('egg1');
+      showAchievementToast(this, '收集解锁：神秘彩蛋');
+    });
+  });
+  npc2.on('pointerdown', () => {
+    dialogMask.setVisible(true);
+    showDialogBox.call(this);
+    dialogText.setVisible(true);
+    dialogText.setText('群众乙：有人举报他清高，其实我觉得他挺正直的。');
+    this.time.delayedCall(1200, () => {
+      dialogText.setVisible(false);
+      dialogMask.setVisible(false);
+      hideDialogBox();
+    });
+  });
+
+  // 剧情触发
+  let talkBtn, defendBtn;
+  let hasPlayed = false;
+
+  this.physics.add.overlap(player, leader, () => {
+    if (dialogMask.visible || hasPlayed) return;
+    hasPlayed = true;
+    dialogMask.setVisible(true);
+    showDialogBox.call(this);
+    dialogText.setVisible(true);
+    bigPlayer.setVisible(true);
+    player.setVisible(false);
+    leader.setVisible(false);
+
+    // 画面元素
+    const dialogCenterX = containerWidth/2;
+    const dialogCenterY = containerHeight/2;
+    let awardImg = this.add.image(dialogCenterX + 220, dialogCenterY - 110, 'awardMedal')
+      .setScale(0.4).setDepth(16).setAlpha(1).setInteractive();
+    let phoneImg = this.add.image(dialogCenterX - 220, dialogCenterY + 110, 'phone')
+      .setScale(0.38).setDepth(15).setAlpha(1).setInteractive();
+
+    // 剧情分步推进
+    let step = 0;
+    const dialogArr = [
+      '领导：最近有群众反映你“清高”，还收到匿名举报，你怎么看？',
+      '张明：我只是坚持原则，问心无愧。',
+      '领导：组织会查清事实，但希望你能主动沟通，消除误会。',
+      '你要主动解释吗？'
+    ];
+
+    function tryShowChoice() {
+      dialogMask.setVisible(true);
+      showDialogBox.call(this);
+      dialogText.setVisible(true);
+      dialogText.setText('你要主动解释吗？');
+      dialogText.setWordWrapWidth(500);
+
+      talkBtn = this.add.text(dialogCenterX-80, dialogCenterY+70, '主动解释', {
+        fontSize: '18px', fill: '#fff', backgroundColor: '#00bfff', padding: { x: 16, y: 8 }
+      }).setDepth(18).setInteractive();
+
+      defendBtn = this.add.text(dialogCenterX+40, dialogCenterY+70, '保持沉默', {
+        fontSize: '18px', fill: '#fff', backgroundColor: '#555', padding: { x: 16, y: 8 }
+      }).setDepth(18).setInteractive();
+
+      talkBtn.on('pointerdown', () => {
+        gameState.stats.reputation += 10;
+        unlockAchievement('model', '廉洁楷模');
+        unlockCollection('person2');
+        showAchievementToast(this, '成就解锁：廉洁楷模');
+        talkBtn.destroy(); defendBtn.destroy();
+        dialogText.setText('你主动解释，赢得了同事的理解。');
+        updateStats();
+        this.time.delayedCall(1200, () => {
+          dialogText.setVisible(false);
+  //hideDialogBox();
+  //dialogMask.setVisible(false);
+  if (phoneImg) phoneImg.destroy();
+  if (awardImg) awardImg.destroy();
+
+          showLinkGame(this, (linkScore) => {
+      showMemoryGame(this, (memoryScore) => {
+        showExclamAndGotoNext.call(this, linkScore, memoryScore);
+      });
+    });
+        });
+      });
+      defendBtn.on('pointerdown', () => {
+        gameState.stats.courage += 5;
+        unlockAchievement('fail', '失落结局');
+        defendBtn.destroy(); talkBtn.destroy();
+        dialogText.setText('你选择沉默，风波暂时平息，但流言未止。');
+        updateStats();
+        this.time.delayedCall(1200, () => {
+          dialogText.setVisible(false);
+  //hideDialogBox();
+  //dialogMask.setVisible(false);
+  if (phoneImg) phoneImg.destroy();
+  if (awardImg) awardImg.destroy();
+
+          showLinkGame(this, (linkScore) => {
+      showMemoryGame(this, (memoryScore) => {
+        showExclamAndGotoNext.call(this, linkScore, memoryScore);
+      });
+    });
+        });
+      });
+    }
+
+    const nextStep = () => {
+      step++;
+      dialogText.setText('');
+      dialogText.setPosition(dialogCenterX, dialogCenterY).setOrigin(0.5, 0.5);
+
+      if (step >= 1 && step <= 3) {
+        dialogText.setText(dialogArr[step - 1]);
+        setTimeout(nextStep, 2200);
+      } else {
+        dialogText.setText('你会如何应对？');
+        dialogText.setWordWrapWidth(500);
+        this.time.delayedCall(1200, () => {
+          dialogText.setVisible(false);
+          dialogMask.setVisible(false);
+          hideDialogBox();
+          tryShowChoice.call(this);
+        });
+      }
+    };
+
+    nextStep();
+
+    dialogText.setWordWrapWidth(320);
+  });
+
+  
+
+  function showExclamAndGotoNext(linkScore, memoryScore) {
+  dialogMask.setVisible(false);
+  hideDialogBox();
+  dialogText.setVisible(false);
+  bigPlayer.setVisible(false);
+  if (talkBtn) talkBtn.destroy();
+  if (defendBtn) defendBtn.destroy();
+  let exclamIcon = this.add.text(containerWidth/2-10, containerHeight/2-30, '！', {
+    fontSize: '48px', fill: '#00ffff', fontWeight: 'bold', shadow: { color: '#1e90ff', blur: 8, fill: true }
+  }).setDepth(20);
+
+  // 连连看得分影响属性
+  if (typeof linkScore === 'number' && linkScore >= 2) {
+    gameState.stats.wisdom += 5;
+    unlockAchievement('linkmaster', '连连看达人');
+    showAchievementToast(this, '成就解锁：连连看达人');
+  }
+  // 记忆翻牌得分影响属性
+  if (typeof memoryScore === 'number' && memoryScore >= 2) {
+    gameState.stats.courage += 5;
+    unlockAchievement('memorymaster', '记忆达人');
+    showAchievementToast(this, '成就解锁：记忆达人');
+  }
+  saveState();
+  this.time.delayedCall(1000, () => {
+    exclamIcon.destroy();
+    window.location.href = 'scene3.html';
+  });
+}
+}
+</script>
+</body>
+</html>
